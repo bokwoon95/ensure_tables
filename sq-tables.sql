@@ -208,7 +208,7 @@ CREATE TABLE customer (
     ,store_id INT NOT NULL
     ,first_name TEXT NOT NULL
     ,last_name TEXT NOT NULL
-    ,email TEXT
+    ,email TEXT UNIQUE
     ,address_id INT NOT NULL
     ,active BOOLEAN DEFAULT TRUE NOT NULL
     ,data JSON

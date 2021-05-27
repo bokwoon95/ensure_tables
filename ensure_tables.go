@@ -1,16 +1,18 @@
 package ensure_tables
 
 import (
+	"database/sql"
+
 	_ "github.com/mattn/go-sqlite3"
 )
+
+type QualifiedName struct{ Schema, Name string }
 
 type Foo interface {
 	GetTableNames() (tableNames []QualifiedName, err error)
 	GetColumns(tableName QualifiedName) (columns map[string]Column, err error)
 	GetIndices(tableName QualifiedName)
 }
-
-type QualifiedName struct{ Schema, Name string }
 
 /*
 'CREATE-ONLY' options:
@@ -28,26 +30,32 @@ type QualifiedName struct{ Schema, Name string }
 */
 
 type Column struct {
-	Table            QualifiedName
-	Name             string
-	Type             string
-	Default          string
-	NotNull          bool
-	IsPrimaryKey     bool
-	IsForeignKey     bool
-	IsUnique         bool
-	IsAutoincrement  bool
-	ReferencesTable  QualifiedName
-	ReferencesColumn string
+	Schema             string
+	Table              string
+	Name               string
+	Type               string
+	NotNull            bool
+	IsPrimaryKey       bool
+	IsForeignKey       bool
+	IsUnique           bool
+	IsAutoincrement    bool
+	Default            sql.NullString
+	ReferencesSchema   sql.NullString
+	ReferencesTable    sql.NullString
+	ReferencesColumn   sql.NullString
+	ReferencesOnUpdate sql.NullString
+	ReferencesOnDelete sql.NullString
 }
 
 type Index struct {
-	Table     QualifiedName
-	Name      QualifiedName
-	Type      string // BTREE | HASH | GIST | SPGIST | GIN | BRIN | FULLTEXT | SPATIAL
-	IsUnique  bool
-	IsPartial bool
-	Columns   []IndexColumn
+	IndexSchema string
+	TableSchema string
+	Table       string
+	Name        string
+	Type        string // BTREE | HASH | GIST | SPGIST | GIN | BRIN | FULLTEXT | SPATIAL
+	IsUnique    bool
+	IsPartial   bool
+	Columns     []IndexColumn
 }
 
 type IndexColumn struct {

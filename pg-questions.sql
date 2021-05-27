@@ -4,10 +4,6 @@ SELECT table_schema, table_name
 FROM information_schema.tables
 WHERE table_type = 'BASE TABLE' AND table_schema NOT IN ('pg_catalog', 'information_schema');
 
-SELECT schemaname, tablename
-FROM pg_catalog.pg_tables
-WHERE schemaname NOT IN ('pg_catalog', 'information_schema');
-
 -- Get columns
 
 WITH pkey_columns AS (
@@ -45,6 +41,7 @@ WITH pkey_columns AS (
         ccu.table_schema
         ,ccu.table_name
         ,ccu.column_name
+        ,COUNT(*) OVER (PARTITION BY constraint_name) AS num_columns
     FROM
         information_schema.constraint_column_usage AS ccu
         JOIN information_schema.table_constraints AS tc USING (constraint_schema, constraint_name)
@@ -52,26 +49,34 @@ WITH pkey_columns AS (
         tc.constraint_type = 'UNIQUE'
 )
 SELECT
-    columns.column_name -- Name
-    ,columns.data_type -- Type
-    ,columns.udt_name -- Type
+    columns.column_name AS name -- Name
+    ,columns.data_type AS type_1 -- Type
+    ,columns.udt_name AS type_2 -- Type
     ,columns.numeric_precision -- Type
     ,columns.numeric_scale -- Type
-    ,columns.is_nullable -- NotNull
-    ,columns.column_default -- Default / Autoincrement (SERIAL)
-    ,CASE WHEN pkey_columns.column_name IS NULL THEN FALSE ELSE TRUE END AS is_primary_key -- PrimaryKey
-    ,CASE WHEN unique_columns.column_name IS NULL THEN FALSE ELSE TRUE END AS is_unique -- Unique
-    ,columns.is_identity -- Autoincrement (IDENTITY)
-    ,fkey_columns.ref_schema -- References
-    ,fkey_columns.ref_table -- References
-    ,fkey_columns.ref_column -- References
-    ,fkey_columns.update_rule -- References
-    ,fkey_columns.delete_rule -- References
+    ,NOT columns.is_nullable::BOOLEAN AS not_null -- NotNull
+    ,pkey_columns.column_name IS NOT NULL AS is_primary_key -- IsPrimaryKey
+    ,fkey_columns.ref_table IS NOT NULL AS is_foreign_key -- IsForeignKey
+    ,unique_columns.column_name IS NOT NULL AS is_unique -- IsUnique
+    ,COALESCE(columns.is_identity::BOOLEAN OR columns.column_default = format('nextval(''%s_%s_seq''::regclass)', columns.table_name, columns.column_name), FALSE) AS is_autoincrement -- IsAutoincrement
+    ,CASE columns.column_default
+        WHEN format('nextval(''%s_%s_seq''::regclass)', columns.table_name, columns.column_name) THEN NULL
+        ELSE columns.column_default
+    END AS "default" -- Default
+    ,fkey_columns.ref_schema AS references_schema -- ReferencesSchema
+    ,fkey_columns.ref_table AS references_table -- ReferencesTable
+    ,fkey_columns.ref_column AS references_column -- ReferencesColumn
+    ,fkey_columns.update_rule AS references_on_update -- ReferencesOnUpdate
+    ,fkey_columns.delete_rule AS references_on_delete -- ReferencesOnDelete
 FROM
     information_schema.columns
     LEFT JOIN pkey_columns USING (table_schema, table_name, column_name)
     LEFT JOIN fkey_columns USING (table_schema, table_name, column_name)
-    LEFT JOIN unique_columns USING (table_schema, table_name, column_name)
+    LEFT JOIN unique_columns ON
+        unique_columns.table_schema = columns.table_schema
+        AND unique_columns.table_name = columns.table_name
+        AND unique_columns.column_name = columns.column_name
+        AND unique_columns.num_columns = 1
 WHERE
     columns.table_schema = 'public'
     AND columns.table_name = 'actor'

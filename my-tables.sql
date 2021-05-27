@@ -190,7 +190,7 @@ CREATE TABLE customer (
     ,store_id INT NOT NULL
     ,first_name VARCHAR(45) NOT NULL
     ,last_name VARCHAR(45) NOT NULL
-    ,email VARCHAR(50)
+    ,email VARCHAR(50) UNIQUE
     ,address_id INT NOT NULL
     ,active BOOLEAN DEFAULT TRUE NOT NULL
     ,data JSON
