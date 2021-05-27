@@ -49,13 +49,13 @@ WITH pkey_columns AS (
         tc.constraint_type = 'UNIQUE'
 )
 SELECT
-    columns.table_schema AS schema -- Schema
-    ,columns.table_name AS "table" -- Table
-    ,columns.column_name AS name -- Name
-    ,columns.data_type AS type_1 -- Type
-    ,columns.udt_name AS type_2 -- Type
-    ,columns.numeric_precision -- Type
-    ,columns.numeric_scale -- Type
+    columns.table_schema -- TableSchema
+    ,columns.table_name -- TableName
+    ,columns.column_name -- ColumnName
+    ,columns.data_type AS column_type_1 -- ColumnType
+    ,columns.udt_name AS column_type_2 -- ColumnType
+    ,columns.numeric_precision -- ColumnType
+    ,columns.numeric_scale -- ColumnType
     ,NOT columns.is_nullable::BOOLEAN AS not_null -- NotNull
     ,pkey_columns.column_name IS NOT NULL AS is_primary_key -- IsPrimaryKey
     ,unique_columns.column_name IS NOT NULL AS is_unique -- IsUnique
@@ -63,7 +63,7 @@ SELECT
     ,CASE columns.column_default
         WHEN format('nextval(''%s_%s_seq''::regclass)', columns.table_name, columns.column_name) THEN NULL
         ELSE columns.column_default
-    END AS "default" -- Default
+    END AS column_default -- ColumnDefault
     ,fkey_columns.ref_schema AS references_schema -- ReferencesSchema
     ,fkey_columns.ref_table AS references_table -- ReferencesTable
     ,fkey_columns.ref_column AS references_column -- ReferencesColumn
@@ -92,14 +92,14 @@ WITH column_names (attnum, attname, attrelid) AS (
 )
 ,indexed_columns AS (
     SELECT
-        index_namespace.nspname AS index_schema -- IndexSchema
-        ,table_namespace.nspname AS table_schema -- TableSchema
-        ,table_info.relname AS "table" -- Table
-        ,index_info.relname AS name -- Name
-        ,pg_am.amname AS "type" -- Type
-        ,pg_index.indisunique AS is_unique -- IsUnique
-        ,pg_index.indpred IS NOT NULL AS is_partial -- IsPartial
-        ,COALESCE(column_names.attname, '') AS column_name -- Column Name
+        table_namespace.nspname AS table_schema
+        ,table_info.relname AS table_name
+        ,index_namespace.nspname AS index_schema
+        ,index_info.relname AS index_name
+        ,pg_am.amname AS index_type
+        ,pg_index.indisunique AS is_unique
+        ,pg_index.indpred IS NOT NULL AS is_partial
+        ,COALESCE(column_names.attname, '') AS column_name
     FROM
         pg_catalog.pg_index
         JOIN pg_catalog.pg_class AS index_info ON index_info.oid = pg_index.indexrelid
@@ -119,22 +119,22 @@ WITH column_names (attnum, attname, attrelid) AS (
         ,array_position(pg_index.indkey, column_names.attnum)
 )
 SELECT
-    index_schema
-    ,table_schema
-    ,"table" -- Table
-    ,name -- Name
-    ,"type"
+    table_schema -- TableSchema
+    ,table_name -- TableName
+    ,index_schema -- IndexSchema
+    ,index_name -- IndexName
+    ,index_type -- IndexType
     ,is_unique -- IsUnique
     ,is_partial -- IsPartial
     ,json_agg(column_name) AS columns -- Columns
 FROM
     indexed_columns
 GROUP BY
-    index_schema
-    ,table_schema
-    ,"table" -- Table
-    ,name -- Name
-    ,"type"
-    ,is_unique -- IsUnique
-    ,is_partial -- IsPartial
+    table_schema
+    ,table_name
+    ,index_schema
+    ,index_name
+    ,index_type
+    ,is_unique
+    ,is_partial
 ;

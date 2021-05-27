@@ -30,15 +30,15 @@ type Foo interface {
 */
 
 type Column struct {
-	Schema             string
-	Table              string
-	Name               string
-	Type               string
+	TableSchema        string
+	TableName          string
+	ColumnName         string
+	ColumnType         string
 	NotNull            bool
 	IsPrimaryKey       bool
 	IsUnique           bool
 	IsAutoincrement    bool
-	Default            sql.NullString
+	ColumnDefault      sql.NullString
 	ReferencesSchema   sql.NullString
 	ReferencesTable    sql.NullString
 	ReferencesColumn   sql.NullString
@@ -47,11 +47,11 @@ type Column struct {
 }
 
 type Index struct {
-	IndexSchema string
 	TableSchema string
-	Table       string
-	Name        string
-	Type        string // BTREE | HASH | GIST | SPGIST | GIN | BRIN | FULLTEXT | SPATIAL
+	TableName   string
+	IndexSchema string
+	IndexName   string
+	IndexType   string // BTREE | HASH | GIST | SPGIST | GIN | BRIN | FULLTEXT | SPATIAL
 	IsUnique    bool
 	IsPartial   bool
 	Columns     []string

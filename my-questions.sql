@@ -25,18 +25,18 @@ WITH fkey_columns AS (
         tc.constraint_type = 'FOREIGN KEY'
 )
 SELECT
-    columns.table_schema AS "schema" -- Schema
-    ,columns.table_name AS "table" -- Table
-    ,columns.column_name AS name -- Name
-    ,columns.data_type AS type_1 -- Type
-    ,columns.column_type AS type_2 -- Type
-    ,columns.numeric_precision -- Type
-    ,columns.numeric_scale -- Type
+    columns.table_schema -- TableSchema
+    ,columns.table_name -- TableName
+    ,columns.column_name -- ColumnName
+    ,columns.data_type AS column_type_1 -- ColumnType
+    ,columns.column_type AS column_type_2 -- ColumnType
+    ,columns.numeric_precision -- ColumnType
+    ,columns.numeric_scale -- ColumnType
     ,NOT columns.is_nullable AS not_null -- NotNull
     ,columns.column_key = 'PRI' AS is_primary_key -- IsPrimaryKey
     ,columns.column_key = 'UNI' AS is_unique -- IsUnique
     ,columns.extra = 'auto_increment' AS is_autoincrement -- IsAutoincrement
-    ,columns.column_default AS "default" -- Default
+    ,columns.column_default -- ColumnDefault
     ,fkey_columns.referenced_table_schema AS references_schema -- ReferencesSchema
     ,fkey_columns.referenced_table_name AS references_table -- ReferencesTable
     ,fkey_columns.referenced_column_name AS references_column -- ReferencesColumn
@@ -52,16 +52,40 @@ WHERE
 
 -- Get indices
 
+WITH indexed_columns AS (
+    SELECT
+        index_schema
+        ,table_schema
+        ,table_name
+        ,index_name
+        ,index_type
+        ,NOT non_unique AS is_unique
+        ,CASE WHEN expression IS NOT NULL THEN '' ELSE column_name END AS column_name
+    FROM
+        information_schema.statistics
+    WHERE
+        statistics.table_schema = 'db'
+        AND statistics.table_name = 'rental'
+        AND statistics.index_name <> 'PRIMARY'
+    ORDER BY
+        index_name
+        ,seq_in_index
+)
 SELECT
-    statistics.index_name -- Name
-    ,statistics.non_unique -- Mode
-    ,statistics.index_type -- Type
-    ,statistics.seq_in_index -- Column Rank
-    ,statistics.expression -- Column Expression
-    ,statistics.column_name -- Column Name
+    table_schema -- TableSchema
+    ,table_name -- TableName
+    ,index_schema -- IndexSchema
+    ,index_name -- IndexName
+    ,index_type -- IndexType
+    ,is_unique -- IsUnique
+    ,json_arrayagg(column_name) AS columns -- Columns
 FROM
-    information_schema.statistics
-WHERE
-    statistics.table_schema = 'db'
-    AND statistics.table_name = 'rental'
+    indexed_columns
+GROUP BY
+    table_schema
+    ,table_name
+    ,index_schema
+    ,index_name
+    ,index_type
+    ,is_unique
 ;
