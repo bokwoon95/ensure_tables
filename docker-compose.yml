@@ -1,0 +1,31 @@
+version: '3.2'
+services:
+
+  postgres:
+    container_name: "ensure_tables_postgres"
+    image: 'postgres'
+    ports:
+      - "5440:5432"
+    volumes:
+      - 'postgres_data:/var/lib/postgresql/data'
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "db"
+
+  mysql:
+    container_name: "ensure_tables_mysql"
+    image: 'mysql'
+    ports:
+      - "3310:3306"
+    volumes:
+      - 'mysql_data:/var/lib/mysql'
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_USER: "mysql"
+      MYSQL_PASSWORD: "mysql"
+      MYSQL_DATABASE: "db"
+
+volumes:
+  postgres_data:
+  mysql_data:
