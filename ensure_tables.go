@@ -9,9 +9,9 @@ import (
 type QualifiedName struct{ Schema, Name string }
 
 type Foo interface {
-	GetTableNames() (tableNames []QualifiedName, err error)
-	GetColumns(tableName QualifiedName) (columns map[string]Column, err error)
-	GetIndices(tableName QualifiedName)
+	GetTables() (tables []QualifiedName, err error)
+	GetColumns(table QualifiedName) (columns map[string]Column, err error)
+	GetIndices(table QualifiedName) (indices map[string]Index, err error)
 }
 
 /*
@@ -36,7 +36,6 @@ type Column struct {
 	Type               string
 	NotNull            bool
 	IsPrimaryKey       bool
-	IsForeignKey       bool
 	IsUnique           bool
 	IsAutoincrement    bool
 	Default            sql.NullString
@@ -55,19 +54,5 @@ type Index struct {
 	Type        string // BTREE | HASH | GIST | SPGIST | GIN | BRIN | FULLTEXT | SPATIAL
 	IsUnique    bool
 	IsPartial   bool
-	Columns     []IndexColumn
-}
-
-type IndexColumn struct {
-	Column     string
-	Expression string
-	Rank       int
-	Modifiers  string
-}
-
-type Table struct {
-	Schema  string
-	Name    string
-	Columns []Column
-	Indices []Index
+	Columns     []string
 }

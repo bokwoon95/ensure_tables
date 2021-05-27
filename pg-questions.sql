@@ -58,7 +58,6 @@ SELECT
     ,columns.numeric_scale -- Type
     ,NOT columns.is_nullable::BOOLEAN AS not_null -- NotNull
     ,pkey_columns.column_name IS NOT NULL AS is_primary_key -- IsPrimaryKey
-    ,fkey_columns.ref_table IS NOT NULL AS is_foreign_key -- IsForeignKey
     ,unique_columns.column_name IS NOT NULL AS is_unique -- IsUnique
     ,COALESCE(columns.is_identity::BOOLEAN OR columns.column_default = format('nextval(''%s_%s_seq''::regclass)', columns.table_name, columns.column_name), FALSE) AS is_autoincrement -- IsAutoincrement
     ,CASE columns.column_default
@@ -86,26 +85,56 @@ WHERE
 
 -- Get indices
 
+WITH column_names (attnum, attname, attrelid) AS (
+    SELECT 0::INT2, NULL, NULL
+    UNION
+    SELECT attnum, attname, attrelid FROM pg_catalog.pg_attribute
+)
+,indexed_columns AS (
+    SELECT
+        index_namespace.nspname AS index_schema -- IndexSchema
+        ,table_namespace.nspname AS table_schema -- TableSchema
+        ,table_info.relname AS "table" -- Table
+        ,index_info.relname AS name -- Name
+        ,pg_am.amname AS "type" -- Type
+        ,pg_index.indisunique AS is_unique -- IsUnique
+        ,pg_index.indpred IS NOT NULL AS is_partial -- IsPartial
+        ,COALESCE(column_names.attname, '') AS column_name -- Column Name
+    FROM
+        pg_catalog.pg_index
+        JOIN pg_catalog.pg_class AS index_info ON index_info.oid = pg_index.indexrelid
+        JOIN pg_catalog.pg_class AS table_info ON table_info.oid = pg_index.indrelid
+        LEFT JOIN column_names ON
+            column_names.attnum = ANY(pg_index.indkey)
+            AND (column_names.attrelid = table_info.oid OR column_names.attrelid IS NULL)
+        JOIN pg_catalog.pg_namespace AS index_namespace ON index_namespace.oid = index_info.relnamespace
+        JOIN pg_catalog.pg_namespace AS table_namespace ON table_namespace.oid = table_info.relnamespace
+        JOIN pg_catalog.pg_am ON pg_am.oid = index_info.relam
+    WHERE
+        table_namespace.nspname = 'public'
+        AND table_info.relname = 'rental'
+        AND NOT pg_index.indisprimary
+    ORDER BY
+        index_info.relname
+        ,array_position(pg_index.indkey, column_names.attnum)
+)
 SELECT
-    index_info.relname AS name -- Name
-    ,pg_index.indisunique AS is_unique -- Mode
-    ,pg_am.amname AS "type" -- Type
-    ,pg_index.indpred IS NOT NULL AS is_partial -- Predicate
-    ,array_position(pg_index.indkey, pg_attribute.attnum) AS seqno -- Column Rank
-    ,pg_attribute.attname IS NULL AS is_expression -- Column Expression
-    ,pg_attribute.attname AS col_name -- Column Name
+    index_schema
+    ,table_schema
+    ,"table" -- Table
+    ,name -- Name
+    ,"type"
+    ,is_unique -- IsUnique
+    ,is_partial -- IsPartial
+    ,json_agg(column_name) AS columns -- Columns
 FROM
-    pg_catalog.pg_index
-    JOIN pg_catalog.pg_class AS index_info ON index_info.oid = pg_index.indexrelid
-    JOIN pg_catalog.pg_class AS table_info ON table_info.oid = pg_index.indrelid
-    LEFT JOIN pg_catalog.pg_attribute ON pg_attribute.attnum = ANY(pg_index.indkey) AND pg_attribute.attrelid = table_info.oid
-    JOIN pg_catalog.pg_namespace AS table_namespace ON table_namespace.oid = table_info.relnamespace
-    JOIN pg_catalog.pg_am ON pg_am.oid = index_info.relam
-WHERE
-    table_namespace.nspname = 'public'
-    AND table_info.relname = 'rental'
-    AND NOT pg_index.indisprimary
-ORDER BY
-    index_info.relname
-    ,seqno
+    indexed_columns
+GROUP BY
+    index_schema
+    ,table_schema
+    ,"table" -- Table
+    ,name -- Name
+    ,"type"
+    ,is_unique -- IsUnique
+    ,is_partial -- IsPartial
 ;

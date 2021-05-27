@@ -34,7 +34,6 @@ SELECT
     ,columns.numeric_scale -- Type
     ,NOT columns.is_nullable AS not_null -- NotNull
     ,columns.column_key = 'PRI' AS is_primary_key -- IsPrimaryKey
-    ,fkey_columns.referenced_table_name IS NOT NULL AS is_foreign_key -- IsForeignKey
     ,columns.column_key = 'UNI' AS is_unique -- IsUnique
     ,columns.extra = 'auto_increment' AS is_autoincrement -- IsAutoincrement
     ,columns.column_default AS "default" -- Default
