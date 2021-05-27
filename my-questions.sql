@@ -25,22 +25,24 @@ WITH fkey_columns AS (
         tc.constraint_type = 'FOREIGN KEY'
 )
 SELECT
-    columns.column_name -- Name
-    ,columns.data_type -- Type
-    ,columns.column_type -- Type
+    columns.table_schema AS "schema" -- Schema
+    ,columns.table_name AS "table" -- Table
+    ,columns.column_name AS name -- Name
+    ,columns.data_type AS type_1 -- Type
+    ,columns.column_type AS type_2 -- Type
     ,columns.numeric_precision -- Type
     ,columns.numeric_scale -- Type
-    ,columns.is_nullable -- NotNull
-    ,columns.column_default -- Default
-    ,columns.column_key = 'PRI' AS is_primary_key -- PrimaryKey
-    ,columns.column_key = 'UNI' AS is_unique -- Unique
-    ,columns.extra = 'auto_increment' AS autoincrement -- Autoincrement
-    ,columns.extra IN ('DEFAULT GENERATED on update CURRENT_TIMESTAMP', 'on update CURRENT_TIMESTAMP') AS update_timestamp -- OnUpdate
-    ,fkey_columns.referenced_table_schema -- References
-    ,fkey_columns.referenced_table_name -- References
-    ,fkey_columns.referenced_column_name -- References
-    ,fkey_columns.update_rule -- References
-    ,fkey_columns.delete_rule -- References
+    ,NOT columns.is_nullable AS not_null -- NotNull
+    ,columns.column_key = 'PRI' AS is_primary_key -- IsPrimaryKey
+    ,fkey_columns.referenced_table_name IS NOT NULL AS is_foreign_key -- IsForeignKey
+    ,columns.column_key = 'UNI' AS is_unique -- IsUnique
+    ,columns.extra = 'auto_increment' AS is_autoincrement -- IsAutoincrement
+    ,columns.column_default AS "default" -- Default
+    ,fkey_columns.referenced_table_schema AS references_schema -- ReferencesSchema
+    ,fkey_columns.referenced_table_name AS references_table -- ReferencesTable
+    ,fkey_columns.referenced_column_name AS references_column -- ReferencesColumn
+    ,fkey_columns.update_rule AS references_on_update -- ReferencesOnUpdate
+    ,fkey_columns.delete_rule AS references_on_delete -- ReferencesOnDelete
 FROM
     information_schema.columns
     LEFT JOIN fkey_columns USING (table_schema, table_name, column_name)

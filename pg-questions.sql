@@ -49,7 +49,9 @@ WITH pkey_columns AS (
         tc.constraint_type = 'UNIQUE'
 )
 SELECT
-    columns.column_name AS name -- Name
+    columns.table_schema AS schema -- Schema
+    ,columns.table_name AS "table" -- Table
+    ,columns.column_name AS name -- Name
     ,columns.data_type AS type_1 -- Type
     ,columns.udt_name AS type_2 -- Type
     ,columns.numeric_precision -- Type

@@ -7,7 +7,9 @@ WHERE type = 'table';
 -- Get columns
 
 SELECT
-    ti.name -- Name
+    '' AS schema -- Schema
+    ,'customer' AS "table" -- Table
+    ,ti.name -- Name
     ,ti."type" -- Type
     ,ti."notnull" AS not_null -- NotNull
     ,ti.pk AS is_primary_key -- IsPrimaryKey
