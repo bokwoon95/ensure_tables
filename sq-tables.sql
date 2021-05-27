@@ -191,13 +191,15 @@ END;
 
 CREATE TABLE store (
     store_id INTEGER PRIMARY KEY
-    ,manager_staff_id INT NOT NULL UNIQUE
+    ,manager_staff_id INT NOT NULL
     ,address_id INT NOT NULL
     ,last_update DATETIME DEFAULT (DATETIME('now')) NOT NULL
 
     ,FOREIGN KEY (address_id) REFERENCES address (address_id) ON UPDATE CASCADE ON DELETE RESTRICT
     ,FOREIGN KEY (manager_staff_id) REFERENCES staff (staff_id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
+
+CREATE UNIQUE INDEX store_manager_staff_id_idx ON store (manager_staff_id);
 
 CREATE TRIGGER store_last_updated_after_update_trg AFTER UPDATE ON store BEGIN
     UPDATE store SET last_update = DATETIME('now') WHERE store_id = NEW.store_id;

@@ -174,7 +174,7 @@ ALTER TABLE staff ADD CONSTRAINT staff_address_id_fkey FOREIGN KEY (address_id) 
 
 CREATE TABLE store (
     store_id INT AUTO_INCREMENT PRIMARY KEY
-    ,manager_staff_id INT NOT NULL UNIQUE
+    ,manager_staff_id INT NOT NULL
     ,address_id INT NOT NULL
     ,last_update TIMESTAMP DEFAULT NOW() NOT NULL
 );
@@ -184,6 +184,8 @@ ALTER TABLE staff ADD CONSTRAINT staff_store_id_fkey FOREIGN KEY (store_id) REFE
 ALTER TABLE store ADD CONSTRAINT store_address_id_fkey FOREIGN KEY (address_id) REFERENCES address (address_id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 ALTER TABLE store ADD CONSTRAINT store_manager_staff_id_fkey FOREIGN KEY (manager_staff_id) REFERENCES staff (staff_id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+CREATE UNIQUE INDEX store_manager_staff_id_idx ON store (manager_staff_id);
 
 CREATE TABLE customer (
     customer_id INT AUTO_INCREMENT PRIMARY KEY
