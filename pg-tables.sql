@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS dummy_table CASCADE;
 DROP TABLE IF EXISTS payment CASCADE;
 DROP TABLE IF EXISTS rental CASCADE;
 DROP TABLE IF EXISTS inventory CASCADE;
@@ -197,12 +198,11 @@ CREATE TABLE customer (
     ,email TEXT UNIQUE
     ,address_id INT NOT NULL
     ,active BOOLEAN DEFAULT TRUE NOT NULL
-    ,data JSONB
     ,create_date TIMESTAMPTZ DEFAULT NOW() NOT NULL
     ,last_update TIMESTAMPTZ DEFAULT NOW()
-);
 
-ALTER TABLE customer ADD CONSTRAINT customer_email_first_name_last_name_key UNIQUE (email, first_name, last_name);
+    ,CONSTRAINT customer_email_first_name_last_name_key UNIQUE (email, first_name, last_name)
+);
 
 ALTER TABLE customer ADD CONSTRAINT customer_address_id_fkey FOREIGN KEY (address_id) REFERENCES address (address_id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
@@ -213,10 +213,6 @@ CREATE INDEX customer_address_id_idx ON customer USING btree (address_id);
 CREATE INDEX customer_store_id_idx ON customer USING btree (store_id);
 
 CREATE INDEX customer_last_name_idx ON customer USING btree (last_name);
-
-CREATE INDEX customer_email_gmail_idx ON customer (email) WHERE email LIKE '%@gmail.com';
-
-CREATE INDEX customer_customer_id_data_age_idx ON customer (customer_id, ((data->>'age')::INT));
 
 CREATE TRIGGER customer_last_updated_before_update_trg BEFORE UPDATE ON customer FOR EACH ROW EXECUTE PROCEDURE last_updated_trg();
 
@@ -279,3 +275,18 @@ ALTER TABLE payment ADD CONSTRAINT payment_staff_id_fkey FOREIGN KEY (staff_id) 
 CREATE INDEX payment_customer_id_idx ON payment USING btree (customer_id);
 
 CREATE INDEX payment_staff_id_idx ON payment USING btree (staff_id);
+
+CREATE TABLE dummy_table (
+    id1 INT
+    ,id2 TEXT
+    ,score INT
+    ,color TEXT COLLATE "C" DEFAULT ('red')
+    ,data JSON
+
+    ,CONSTRAINT dummy_table_score_positive_check CHECK (score > 0)
+    ,CONSTRAINT dummy_table_id1_id2_pkey PRIMARY KEY (id1, id2)
+    ,CONSTRAINT dummy_table_score_color_key UNIQUE (score, color)
+    ,CONSTRAINT dummy_table_score_id1_greater_than_check CHECK (score > id1)
+);
+
+CREATE INDEX dummy_table_score_color_data_idx ON dummy_table (score, ((data->>'age')::INT), color) WHERE color = 'red';

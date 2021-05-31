@@ -1,4 +1,5 @@
 SET foreign_key_checks = 0;
+DROP TABLE IF EXISTS dummy_table CASCADE;
 DROP TABLE IF EXISTS payment CASCADE;
 DROP TABLE IF EXISTS rental CASCADE;
 DROP TABLE IF EXISTS inventory CASCADE;
@@ -76,7 +77,7 @@ CREATE TABLE film (
     film_id INT AUTO_INCREMENT PRIMARY KEY
     ,title VARCHAR(255) NOT NULL
     ,description TEXT
-    ,release_year INT CHECK (release_year >= 1901 AND release_year <= 2155)
+    ,release_year INT
     ,language_id INT NOT NULL
     ,original_language_id INT
     ,rental_duration INT DEFAULT 3 NOT NULL
@@ -86,6 +87,8 @@ CREATE TABLE film (
     ,rating ENUM('G','PG','PG-13','R','NC-17') DEFAULT 'G'
     ,special_features JSON
     ,last_update TIMESTAMP DEFAULT NOW() NOT NULL
+
+    ,CONSTRAINT film_release_year_check CHECK (release_year >= 1901 AND release_year <= 2155)
 );
 
 ALTER TABLE film ADD CONSTRAINT film_language_id_fkey FOREIGN KEY (language_id) REFERENCES language (language_id) ON UPDATE CASCADE ON DELETE RESTRICT;
@@ -195,12 +198,11 @@ CREATE TABLE customer (
     ,email VARCHAR(50) UNIQUE
     ,address_id INT NOT NULL
     ,active BOOLEAN DEFAULT TRUE NOT NULL
-    ,data JSON
     ,create_date TIMESTAMP DEFAULT NOW() NOT NULL
     ,last_update TIMESTAMP DEFAULT NOW() ON UPDATE NOW()
-);
 
-ALTER TABLE customer ADD CONSTRAINT customer_email_first_name_last_name_key UNIQUE (email, first_name, last_name);
+    ,CONSTRAINT customer_email_first_name_last_name_key UNIQUE (email, first_name, last_name)
+);
 
 ALTER TABLE customer ADD CONSTRAINT customer_address_id_fkey FOREIGN KEY (address_id) REFERENCES address (address_id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
@@ -211,8 +213,6 @@ CREATE INDEX customer_address_id_idx ON customer (address_id);
 CREATE INDEX customer_store_id_idx ON customer (store_id);
 
 CREATE INDEX customer_last_name_idx ON customer (last_name);
-
-CREATE INDEX customer_customer_id_data_age_idx ON customer (customer_id, (CAST(data->>'$.age' AS SIGNED)));
 
 CREATE TABLE inventory (
     inventory_id INT AUTO_INCREMENT PRIMARY KEY
@@ -269,3 +269,18 @@ ALTER TABLE payment ADD CONSTRAINT payment_staff_id_fkey FOREIGN KEY (staff_id) 
 CREATE INDEX payment_customer_id_idx ON payment (customer_id);
 
 CREATE INDEX payment_staff_id_idx ON payment (staff_id);
+
+CREATE TABLE dummy_table (
+    id1 INT
+    ,id2 VARCHAR(255)
+    ,score INT
+    ,color VARCHAR(50) COLLATE latin1_swedish_ci
+    ,data JSON
+
+    ,CONSTRAINT dummy_table_score_positive_check CHECK (score > 0)
+    ,CONSTRAINT dummy_table_id1_id2_pkey PRIMARY KEY (id1, id2)
+    ,CONSTRAINT dummy_table_score_color_key UNIQUE (score, color)
+    ,CONSTRAINT dummy_table_score_id1_greater_than_check CHECK (score > id1)
+);
+
+CREATE INDEX dummy_table_score_color_data_idx ON dummy_table (score, (CAST(data->>'$.age' AS SIGNED)), color);

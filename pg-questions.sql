@@ -6,6 +6,8 @@ WHERE table_type = 'BASE TABLE' AND table_schema NOT IN ('pg_catalog', 'informat
 
 -- Get columns
 
+-- get collation: https://stackoverflow.com/questions/56934368/collation-in-postgresql-db-level-table-level-column-level
+
 WITH pkey_columns AS (
     SELECT
         ccu.table_schema

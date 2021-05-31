@@ -41,6 +41,42 @@ FROM
     LEFT JOIN pragma_foreign_key_list('customer') AS fkl ON fkl."from" = ti.name
 ;
 
+WITH unique_columns AS (
+    SELECT
+        ii.cid
+        ,ii.name
+    FROM
+        pragma_index_list('customer') AS il, pragma_index_info(il.name) AS ii
+    WHERE
+        il."unique" = TRUE
+        AND il.origin = 'u'
+        AND (
+            SELECT COUNT(*)
+            FROM pragma_index_list('customer') AS il2, pragma_index_info(il.name) AS ii2
+            WHERE il2.name = il.name
+            GROUP BY il2.name
+        ) = 1
+)
+SELECT
+    'customer' AS table_name -- TableName
+    ,ti.name AS column_name -- ColumnName
+    ,ti."type" AS column_type -- Type
+    ,ti."notnull" AS not_null -- NotNull
+    ,ti.pk AS is_primary_key -- IsPrimaryKey
+    ,CASE WHEN unique_columns.name IS NULL THEN FALSE ELSE TRUE END AS is_unique -- IsUnique
+    ,ti."type" = 'INTEGER' AND ti.pk AS is_autoincrement -- IsAutoincrement
+    ,ti.dflt_value AS column_default -- ColumnDefault
+    ,fkl."table" AS references_table -- ReferencesTable
+    ,fkl."to" AS references_column -- ReferencesColumn
+    ,fkl.on_update AS references_on_update -- ReferencesOnUpdate
+    ,fkl.on_delete AS references_on_delete -- ReferencesOnDelete
+FROM
+    pragma_table_info('dummy_table') AS ti
+    LEFT JOIN  unique_columns ON unique_columns.cid = ti.cid
+    LEFT JOIN pragma_foreign_key_list('dummy_table') AS fkl ON fkl."from" = ti.name
+;
+
+
 -- Get indices
 
 WITH indexed_columns AS (

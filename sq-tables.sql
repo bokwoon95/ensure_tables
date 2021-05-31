@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS dummy_table;
 DROP TABLE IF EXISTS payment;
 DROP TABLE IF EXISTS rental;
 DROP TABLE IF EXISTS inventory;
@@ -98,17 +99,19 @@ CREATE TABLE film (
     film_id INTEGER PRIMARY KEY
     ,title TEXT NOT NULL
     ,description TEXT
-    ,release_year INT CHECK (release_year >= 1901 AND release_year <= 2155)
+    ,release_year INT
     ,language_id INT NOT NULL
     ,original_language_id INT
     ,rental_duration INT DEFAULT 3 NOT NULL
     ,rental_rate DECIMAL(4,2) DEFAULT 4.99 NOT NULL
     ,length INT
     ,replacement_cost DECIMAL(5,2) DEFAULT 19.99 NOT NULL
-    ,rating TEXT CHECK (rating IN ('G','PG','PG-13','R','NC-17')) DEFAULT 'G'
+    ,rating TEXT DEFAULT 'G'
     ,special_features JSON
     ,last_update DATETIME DEFAULT (DATETIME('now')) NOT NULL
 
+    ,CONSTRAINT film_release_year_check CHECK (release_year >= 1901 AND release_year <= 2155)
+    ,CONSTRAINT film_rating_check CHECK (rating IN ('G','PG','PG-13','R','NC-17'))
     ,FOREIGN KEY (language_id) REFERENCES language (language_id) ON UPDATE CASCADE ON DELETE RESTRICT
     ,FOREIGN KEY (original_language_id) REFERENCES language (language_id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
@@ -213,7 +216,6 @@ CREATE TABLE customer (
     ,email TEXT UNIQUE
     ,address_id INT NOT NULL
     ,active BOOLEAN DEFAULT TRUE NOT NULL
-    ,data JSON
     ,create_date DATETIME DEFAULT (DATETIME('now')) NOT NULL
     ,last_update DATETIME DEFAULT (DATETIME('now'))
 
@@ -227,10 +229,6 @@ CREATE INDEX customer_address_id_idx ON customer (address_id);
 CREATE INDEX customer_store_id_idx ON customer (store_id);
 
 CREATE INDEX customer_last_name_idx ON customer (last_name);
-
-CREATE INDEX customer_email_gmail_idx ON customer (email) WHERE email LIKE '%@gmail.com';
-
-CREATE INDEX customer_customer_id_data_age_idx ON customer (customer_id, CAST(JSON_EXTRACT(data, '$.age') AS INT));
 
 CREATE TRIGGER customer_last_updated_after_update_trg AFTER UPDATE ON customer BEGIN
     UPDATE customer SET last_update = DATETIME('now') WHERE customer_id = NEW.customer_id;
@@ -294,3 +292,18 @@ CREATE TABLE payment (
 CREATE INDEX payment_customer_id_idx ON payment (customer_id);
 
 CREATE INDEX payment_staff_id_idx ON payment (staff_id);
+
+CREATE TABLE dummy_table (
+    id1 INT
+    ,id2 TEXT
+    ,score INT
+    ,color TEXT COLLATE NOCASE DEFAULT ('red')
+    ,data JSON
+
+    ,CONSTRAINT dummy_table_score_positive_check CHECK (score > 0)
+    ,CONSTRAINT dummy_table_id1_id2_pkey PRIMARY KEY (id1, id2)
+    ,CONSTRAINT dummy_table_score_color_key UNIQUE (score, color)
+    ,CONSTRAINT dummy_table_score_id1_greater_than_check CHECK (score > id1)
+);
+
+CREATE INDEX dummy_table_score_color_data_idx ON dummy_table (score, (CAST(JSON_EXTRACT(data, '$.age') AS INT)), color) WHERE color = 'red';

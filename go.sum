@@ -1,12 +1,2 @@
-github.com/bokwoon95/erro v0.0.0-20210202044924-8768de1b075c h1:Yimirc1oOAtHR+iGM6iC64VnaDwVNVIdbzGgUwFVKjg=
-github.com/bokwoon95/erro v0.0.0-20210202044924-8768de1b075c/go.mod h1:mt7Y0aS24v5FhJgf3/poZlkMZhuc84vzMsQ08DzJEb4=
-github.com/bokwoon95/testutil v0.0.0-20210526043754-2c4f6d10d8ce h1:lAo4mj5nEUfv/WCaHRaHNu1J6vS27xv1rxFKln39DhU=
-github.com/bokwoon95/testutil v0.0.0-20210526043754-2c4f6d10d8ce/go.mod h1:MfnOAD6YBY2DJkDk9qqSeyzbysdrG3O8cfg6eZZPBvs=
-github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
-github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/google/go-cmp v0.5.6 h1:BKbKCqvP6I+rmFHt06ZmyQtvB8xAkWdhFyr0ZUNZcxQ=
-github.com/google/go-cmp v0.5.6/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/mattn/go-sqlite3 v1.14.7 h1:fxWBnXkxfM6sRiuH3bqJ4CfzZojMOLVc0UTsTglEghA=
 github.com/mattn/go-sqlite3 v1.14.7/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
-golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 h1:E7g+9GITq07hpfrRu66IVDexMakfv52eLZ2CXBWiKr4=
-golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=

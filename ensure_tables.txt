@@ -1,9 +1,4 @@
 TODO:
-- generated columns (virtual and materialized)
-- partial indexes (postgres and sqlite only)
-- indexes on expressions
-
-NO SUPPORT FOR MULTICOLUMN UNIQUE CONSTRAINT. Use a multicolumn unique index instead. This is to make column diffing easier: each column carries its own self-contained set of constraints.
 
 Does table exist? If not create it and return
 Else do columns exist? If not create it and return

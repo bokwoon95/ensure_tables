@@ -36,6 +36,7 @@ SELECT
     ,columns.column_key = 'PRI' AS is_primary_key -- IsPrimaryKey
     ,columns.column_key = 'UNI' AS is_unique -- IsUnique
     ,columns.extra = 'auto_increment' AS is_autoincrement -- IsAutoincrement
+    ,columns.collation_name -- Collation
     ,columns.column_default -- ColumnDefault
     ,fkey_columns.referenced_table_schema AS references_schema -- ReferencesSchema
     ,fkey_columns.referenced_table_name AS references_table -- ReferencesTable
