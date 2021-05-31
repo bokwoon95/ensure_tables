@@ -219,7 +219,7 @@ CREATE TABLE customer (
     ,create_date DATETIME DEFAULT (DATETIME('now')) NOT NULL
     ,last_update DATETIME DEFAULT (DATETIME('now'))
 
-    ,UNIQUE(email, first_name, last_name)
+    ,CONSTRAINT customer_email_first_name_last_name_key UNIQUE (email, first_name, last_name)
     ,FOREIGN KEY (address_id) REFERENCES address (address_id) ON UPDATE CASCADE ON DELETE RESTRICT
     ,FOREIGN KEY (store_id) REFERENCES store (store_id) ON UPDATE CASCADE ON DELETE RESTRICT
 );

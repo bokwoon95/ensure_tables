@@ -76,6 +76,8 @@ FROM
     LEFT JOIN pragma_foreign_key_list('dummy_table') AS fkl ON fkl."from" = ti.name
 ;
 
+-- Get constraints
+
 
 -- Get indices
 

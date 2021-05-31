@@ -51,6 +51,11 @@ WHERE
     AND columns.table_name = 'actor'
 ;
 
+-- Get constraints
+
+-- https://stackoverflow.com/questions/4004205/show-constraints-on-tables-command
+-- https://dev.mysql.com/doc/refman/8.0/en/information-schema-check-constraints-table.html
+
 -- Get indices
 
 WITH indexed_columns AS (

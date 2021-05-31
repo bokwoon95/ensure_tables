@@ -24,7 +24,7 @@ CREATE TABLE actor (
     ,last_name VARCHAR(45) NOT NULL
     ,full_name VARCHAR(45) GENERATED ALWAYS AS (CONCAT(first_name, ' ', last_name)) VIRTUAL
     ,full_name_reversed VARCHAR(45) GENERATED ALWAYS AS (CONCAT(last_name, ' ', first_name)) STORED
-    ,last_update TIMESTAMP DEFAULT NOW() ON UPDATE NOW() NOT NULL
+    ,last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE INDEX actor_last_name_idx ON actor (last_name);
@@ -32,20 +32,20 @@ CREATE INDEX actor_last_name_idx ON actor (last_name);
 CREATE TABLE category (
     category_id INT AUTO_INCREMENT PRIMARY KEY
     ,name VARCHAR(25) NOT NULL
-    ,last_update TIMESTAMP DEFAULT NOW() ON UPDATE NOW() NOT NULL
+    ,last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE country (
     country_id INT AUTO_INCREMENT PRIMARY KEY
     ,country VARCHAR(50) NOT NULL
-    ,last_update TIMESTAMP DEFAULT NOW() ON UPDATE NOW() NOT NULL
+    ,last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE city (
     city_id INT AUTO_INCREMENT PRIMARY KEY
     ,city VARCHAR(50) NOT NULL
     ,country_id INT NOT NULL
-    ,last_update TIMESTAMP DEFAULT NOW() ON UPDATE NOW() NOT NULL
+    ,last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL
 );
 
 ALTER TABLE city ADD CONSTRAINT city_country_id_fkey FOREIGN KEY (country_id) REFERENCES country (country_id) ON UPDATE CASCADE ON DELETE RESTRICT;
@@ -60,7 +60,7 @@ CREATE TABLE address (
     ,city_id INT NOT NULL
     ,postal_code VARCHAR(10)
     ,phone VARCHAR(20) NOT NULL
-    ,last_update TIMESTAMP DEFAULT NOW() ON UPDATE NOW() NOT NULL
+    ,last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL
 );
 
 ALTER TABLE address ADD CONSTRAINT address_city_id_fkey FOREIGN KEY (city_id) REFERENCES city (city_id) ON UPDATE CASCADE ON DELETE RESTRICT;
@@ -70,7 +70,7 @@ CREATE INDEX address_city_id_idx ON address (city_id);
 CREATE TABLE language (
     language_id INT AUTO_INCREMENT PRIMARY KEY
     ,name CHAR(20) NOT NULL
-    ,last_update TIMESTAMP DEFAULT NOW() ON UPDATE NOW() NOT NULL
+    ,last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE film (
@@ -86,7 +86,7 @@ CREATE TABLE film (
     ,replacement_cost DECIMAL(5,2) DEFAULT 19.99 NOT NULL
     ,rating ENUM('G','PG','PG-13','R','NC-17') DEFAULT 'G'
     ,special_features JSON
-    ,last_update TIMESTAMP DEFAULT NOW() NOT NULL
+    ,last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 
     ,CONSTRAINT film_release_year_check CHECK (release_year >= 1901 AND release_year <= 2155)
 );
@@ -138,7 +138,7 @@ DELIMITER ;
 CREATE TABLE film_actor (
     actor_id INT NOT NULL
     ,film_id INT NOT NULL
-    ,last_update TIMESTAMP DEFAULT NOW() NOT NULL
+    ,last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 ALTER TABLE film_actor ADD CONSTRAINT film_actor_actor_id_fkey FOREIGN KEY (actor_id) REFERENCES actor (actor_id) ON UPDATE CASCADE ON DELETE RESTRICT;
@@ -152,7 +152,7 @@ CREATE INDEX film_actor_film_id_idx ON film_actor (film_id);
 CREATE TABLE film_category (
     film_id INT NOT NULL
     ,category_id INT NOT NULL
-    ,last_update TIMESTAMP DEFAULT NOW() NOT NULL
+    ,last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 ALTER TABLE film_category ADD CONSTRAINT film_category_category_id_fkey FOREIGN KEY (category_id) REFERENCES category (category_id) ON UPDATE CASCADE ON DELETE RESTRICT;
@@ -169,7 +169,7 @@ CREATE TABLE staff (
     ,active BOOLEAN DEFAULT TRUE NOT NULL
     ,username VARCHAR(16) NOT NULL
     ,password VARCHAR(40)
-    ,last_update TIMESTAMP DEFAULT NOW() ON UPDATE NOW() NOT NULL
+    ,last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL
     ,picture BLOB
 );
 
@@ -179,7 +179,7 @@ CREATE TABLE store (
     store_id INT AUTO_INCREMENT PRIMARY KEY
     ,manager_staff_id INT NOT NULL
     ,address_id INT NOT NULL
-    ,last_update TIMESTAMP DEFAULT NOW() NOT NULL
+    ,last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 ALTER TABLE staff ADD CONSTRAINT staff_store_id_fkey FOREIGN KEY (store_id) REFERENCES store (store_id);
@@ -198,8 +198,8 @@ CREATE TABLE customer (
     ,email VARCHAR(50) UNIQUE
     ,address_id INT NOT NULL
     ,active BOOLEAN DEFAULT TRUE NOT NULL
-    ,create_date TIMESTAMP DEFAULT NOW() NOT NULL
-    ,last_update TIMESTAMP DEFAULT NOW() ON UPDATE NOW()
+    ,create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    ,last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 
     ,CONSTRAINT customer_email_first_name_last_name_key UNIQUE (email, first_name, last_name)
 );
@@ -218,7 +218,7 @@ CREATE TABLE inventory (
     inventory_id INT AUTO_INCREMENT PRIMARY KEY
     ,film_id INT NOT NULL
     ,store_id INT NOT NULL
-    ,last_update TIMESTAMP DEFAULT NOW() ON UPDATE NOW() NOT NULL
+    ,last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL
 );
 
 ALTER TABLE inventory ADD CONSTRAINT inventory_film_id_fkey FOREIGN KEY (film_id) REFERENCES film (film_id) ON UPDATE CASCADE ON DELETE RESTRICT;
@@ -234,7 +234,7 @@ CREATE TABLE rental (
     ,customer_id INT NOT NULL
     ,return_date TIMESTAMP
     ,staff_id INT NOT NULL
-    ,last_update TIMESTAMP DEFAULT NOW() NOT NULL
+    ,last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 ALTER TABLE rental ADD CONSTRAINT rental_customer_id_fkey FOREIGN KEY (customer_id) REFERENCES customer (customer_id) ON UPDATE CASCADE ON DELETE RESTRICT;
